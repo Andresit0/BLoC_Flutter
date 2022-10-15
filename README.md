@@ -1,3 +1,3 @@
 # BLOC TEMPLATE
 
-Example of Flutter project.
+Example of BLoC pattern.

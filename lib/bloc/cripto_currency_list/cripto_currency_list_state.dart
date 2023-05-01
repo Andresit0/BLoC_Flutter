@@ -1,37 +1,27 @@
 part of 'cripto_currency_list_bloc.dart';
 
-@immutable
-abstract class CriptoCurrencyListState {
-  final bool existCriptoCurrency;
+class CriptoCurrencyListState extends Equatable {
+  final bool isLoading;
   final List<CriptoCurrency>? listCriptoCurrency;
+  final String? httpError;
 
   const CriptoCurrencyListState({
-    this.existCriptoCurrency = false,
+    this.isLoading = false,
     this.listCriptoCurrency,
+    this.httpError,
   });
-}
 
-class CriptoCurrencyInitialState extends CriptoCurrencyListState {
-  const CriptoCurrencyInitialState()
-      : super(existCriptoCurrency: false, listCriptoCurrency: null);
-}
+  CriptoCurrencyListState copyWith(
+      {bool? isLoading,
+      List<CriptoCurrency>? listCriptoCurrency,
+      String? httpError}) {
+    return CriptoCurrencyListState(
+      isLoading: isLoading ?? this.isLoading,
+      listCriptoCurrency: listCriptoCurrency ?? this.listCriptoCurrency,
+      httpError: httpError ?? this.httpError,
+    );
+  }
 
-class CriptoCurrencySetState extends CriptoCurrencyListState {
-  final List<CriptoCurrency>? newListCriptoCurrency;
-  const CriptoCurrencySetState(this.newListCriptoCurrency)
-      : super(
-            existCriptoCurrency: true,
-            listCriptoCurrency: newListCriptoCurrency);
-}
-
-class CriptocurrencyLoadedState extends CriptoCurrencyListState {
-  final List<CriptoCurrency> criptocurrencies;
-  const CriptocurrencyLoadedState(this.criptocurrencies)
-      : super(existCriptoCurrency: true, listCriptoCurrency: criptocurrencies);
-}
-
-class CriptocurrencyErrorState extends CriptoCurrencyListState {
-  final String error;
-  const CriptocurrencyErrorState(this.error)
-      : super(existCriptoCurrency: false, listCriptoCurrency: null);
+  @override
+  List<Object?> get props => [isLoading, listCriptoCurrency, httpError];
 }

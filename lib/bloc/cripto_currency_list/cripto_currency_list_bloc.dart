@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 import '../../globalVariables/dynamic/list.dart';
 import '../../model/cripto_currency.dart';
@@ -11,27 +11,31 @@ part 'cripto_currency_list_state.dart';
 
 class CriptoCurrencyListBloc
     extends Bloc<CriptoCurrencyListEvent, CriptoCurrencyListState> {
-  CriptoCurrencyListBloc() : super(const CriptoCurrencyInitialState()) {
-    on<CriptocurrencyLoadingEvent>((event, emit) async {
-      CriptoCurrencyRespository criptoCurrencyRespository =
-          CriptoCurrencyRespository();
-      List<CriptoCurrency> listCriptocurrency = [];
-
-      try {
-        for (String criptoCurrency in criptocurrencies) {
-          listCriptocurrency.add(
-              await criptoCurrencyRespository.getCritocurrency(criptoCurrency));
-        }
-      } catch (e) {
-        emit(CriptocurrencyErrorState(e.toString()));
-        throw Exception(
-            "ERROR: CriptocurrencyLoadingEvent lib/bloc/cripto_currency_list/cripto_currency_list_bloc.dart: $e");
-      }
-
-      if (!listEquals(state.listCriptoCurrency, listCriptocurrency)) {
-        emit(CriptoCurrencySetState(listCriptocurrency));
-        emit(CriptocurrencyLoadedState(listCriptocurrency));
-      }
-    });
+  CriptoCurrencyListBloc()
+      : super(const CriptoCurrencyListState(isLoading: true)) {
+    on<CriptocurrenciesLoad>(_criptoCurrencyLoad);
   }
+  _criptoCurrencyLoad(
+      CriptocurrenciesLoad event, Emitter<CriptoCurrencyListState> emit) async {
+    CriptoCurrencyRespository criptoCurrencyRespository =
+        CriptoCurrencyRespository();
+    List<CriptoCurrency> listCriptocurrency = [];
+
+    try {
+      listCriptocurrency =
+          await criptoCurrencyRespository.getCriptocurrencies(criptocurrencies);
+    } catch (e, stacktrace) {
+      emit(state.copyWith(httpError: e.toString(), isLoading: false));
+      throw Exception("ERROR:\n$e\n$stacktrace");
+    }
+
+    if (state !=
+        state.copyWith(
+            listCriptoCurrency: listCriptocurrency, isLoading: false)) {
+      emit(state.copyWith(
+          listCriptoCurrency: listCriptocurrency, isLoading: false));
+    }
+  }
+
+  void loadCriptocurrencies() => add(CriptocurrenciesLoad());
 }

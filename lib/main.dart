@@ -15,8 +15,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-            create: (_) =>
-                CriptoCurrencyListBloc()..add(CriptocurrencyLoadingEvent())),
+            create: (_) => CriptoCurrencyListBloc()..loadCriptocurrencies()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

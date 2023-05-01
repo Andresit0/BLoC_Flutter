@@ -8,18 +8,27 @@ import 'package:http/http.dart';
 import '../../globalVariables/constant/color.dart';
 import '../../model/cripto_currency.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
   Widget criptoCurrencyList() {
     return BlocBuilder<CriptoCurrencyListBloc, CriptoCurrencyListState>(
         builder: ((context, state) {
-      if (state is CriptoCurrencyInitialState) {
+      if (state.isLoading) {
         return const Center(
           child: CircularProgressIndicator(),
         );
-      } else if (state is CriptocurrencyLoadedState) {
-        List<CriptoCurrency> criptoCurrrencies = state.criptocurrencies;
+      } else if (state.httpError != null) {
+        return Center(
+          child: Text('ERROR: ${state.httpError!}'),
+        );
+      } else if (!state.isLoading && state.listCriptoCurrency != null) {
+        List<CriptoCurrency> criptoCurrrencies = state.listCriptoCurrency!;
         return Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
@@ -40,7 +49,9 @@ class Home extends StatelessWidget {
                             .map((e) => e.symbol.toUpperCase())
                             .toList(),
                         criptoCurrrencies
-                            .map((e) => e.price.toString())
+                            .map((e) => e.price.floor() - e.price == 0
+                                ? e.price.toStringAsFixed(0)
+                                : e.price.toString())
                             .toList(),
                       ],
                     ),
@@ -50,10 +61,6 @@ class Home extends StatelessWidget {
             ],
           ),
         );
-      } else if (state is CriptocurrencyErrorState) {
-        return Center(
-          child: Text('ERROR: ${state.error}'),
-        );
       } else {
         return Container();
       }
@@ -62,9 +69,9 @@ class Home extends StatelessWidget {
 
   void updateCriptoCurrencyList(BuildContext context) async {
     while (true) {
-      await Future.delayed(const Duration(minutes: 60)).then((value) async {
+      await Future.delayed(const Duration(seconds: 30)).then((value) async {
         BlocProvider.of<CriptoCurrencyListBloc>(context, listen: false)
-            .add(CriptocurrencyLoadingEvent());
+            .add(CriptocurrenciesLoad());
         return;
       });
     }

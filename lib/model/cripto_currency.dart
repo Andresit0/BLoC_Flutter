@@ -1,9 +1,11 @@
-class CriptoCurrency {
+import 'package:equatable/equatable.dart';
+
+class CriptoCurrency extends Equatable {
   final String name;
   final String symbol;
   final double price;
 
-  CriptoCurrency({
+  const CriptoCurrency({
     required this.name,
     required this.symbol,
     required this.price,
@@ -13,7 +15,7 @@ class CriptoCurrency {
     return CriptoCurrency(
       name: json['name'],
       symbol: json['symbol'],
-      price: json['current_price'],
+      price: json['current_price'].toDouble(),
     );
   }
 
@@ -29,17 +31,8 @@ class CriptoCurrency {
       );
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CriptoCurrency &&
-          runtimeType == other.runtimeType &&
-          name == other.name &&
-          symbol == other.symbol &&
-          price == other.price;
-
-  @override
-  int get hashCode => name.hashCode ^ symbol.hashCode ^ price.hashCode;
-
-  @override
   String toString() => 'name: $name, symbol: $symbol, price: $price';
+
+  @override
+  List<Object?> get props => [name, symbol, price];
 }
